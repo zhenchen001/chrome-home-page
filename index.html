@@ -112,6 +112,113 @@
       opacity: 1;
       text-decoration: underline;
     }
+    /* 編輯按鈕 */
+    .edit-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      z-index: 1000;
+      opacity: 0.7;
+    }
+    .edit-btn:hover {
+      background: #555;
+      opacity: 1;
+    }
+    /* 編輯模態框 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .modal h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .bookmark-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+    .bookmark-item input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+    .bookmark-item button {
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .bookmark-item button:hover {
+      background: #c82333;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    .modal-buttons button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary {
+      background: #007bff;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #0056b3;
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #545b62;
+    }
+    .btn-success {
+      background: #28a745;
+      color: white;
+      margin-bottom: 15px;
+    }
+    .btn-success:hover {
+      background: #1e7e34;
+    }
     @media (max-width: 700px) {
       .bookmarks-bar {
         flex-wrap: wrap;
@@ -146,9 +253,12 @@
   </style>
 </head>
 <body>
+  <button class="edit-btn" onclick="openEditModal()" title="編輯書籤">⚙️</button>
+  
   <div class="bookmarks-bar" id="bookmarksBar">
     <!-- 書籤連結將在這裡生成 -->
   </div>
+  
   <div class="container">
     <h1>Google</h1>
     <form id="searchForm" autocomplete="off">
@@ -161,6 +271,21 @@
       </button>
     </form>
   </div>
+
+  <!-- 編輯書籤模態框 -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h2>編輯書籤</h2>
+      <button class="btn-success" onclick="addBookmark()">➕ 添加新書籤</button>
+      <div id="bookmarksList">
+        <!-- 書籤編輯項目將在這裡生成 -->
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-secondary" onclick="closeEditModal()">取消</button>
+        <button class="btn-primary" onclick="saveBookmarks()">保存</button>
+      </div>
+    </div>
+  </div>
   <script>
     document.getElementById('searchForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -170,7 +295,7 @@
       }
     });
 
-    // 書籤資料，將從服務器獲取
+    // 書籤資料，將從 JSON 文件或本地存储獲取
     let bookmarksData = [
       { "name": "GitHub", "url": "https://github.com/" },
       { "name": "Google 翻譯", "url": "https://translate.google.com/" },
@@ -178,8 +303,27 @@
       { "name": "維基百科", "url": "https://zh.wikipedia.org/" }
     ];
 
-    // 從服務器獲取書籤
-    async function fetchBookmarks() {
+    // 從 JSON 文件獲取書籤（用於 GitHub Pages）
+    async function fetchBookmarksFromFile() {
+      try {
+        const response = await fetch('./bookmarks.json');
+        if (response.ok) {
+          const bookmarks = await response.json();
+          if (bookmarks && bookmarks.length > 0) {
+            bookmarksData = bookmarks;
+            renderBookmarks(bookmarksData);
+            console.log('成功從 JSON 文件獲取書籤:', bookmarks.length, '個書籤');
+            return true;
+          }
+        }
+      } catch (error) {
+        console.log('無法獲取 JSON 書籤數據:', error.message);
+      }
+      return false;
+    }
+
+    // 從本地服務器獲取書籤（用於本地開發）
+    async function fetchBookmarksFromServer() {
       try {
         const response = await fetch('http://localhost:8000/bookmarks');
         if (response.ok) {
@@ -188,13 +332,64 @@
             bookmarksData = bookmarks;
             renderBookmarks(bookmarksData);
             console.log('成功從 Chrome 獲取書籤:', bookmarks.length, '個書籤');
+            return true;
           }
-        } else {
-          console.log('無法連接到書籤服務器，使用默認書籤');
         }
       } catch (error) {
-        console.log('無法獲取書籤數據，使用默認書籤:', error.message);
+        console.log('無法連接到本地服務器:', error.message);
       }
+      return false;
+    }
+
+    // 從本地存储獲取書籤
+    function getBookmarksFromStorage() {
+      try {
+        const stored = localStorage.getItem('customBookmarks');
+        if (stored) {
+          const bookmarks = JSON.parse(stored);
+          if (bookmarks && bookmarks.length > 0) {
+            bookmarksData = bookmarks;
+            renderBookmarks(bookmarksData);
+            console.log('從本地存储獲取書籤:', bookmarks.length, '個書籤');
+            return true;
+          }
+        }
+      } catch (error) {
+        console.log('無法從本地存储獲取書籤:', error.message);
+      }
+      return false;
+    }
+
+    // 保存書籤到本地存储
+    function saveBookmarksToStorage(bookmarks) {
+      try {
+        localStorage.setItem('customBookmarks', JSON.stringify(bookmarks));
+        console.log('書籤已保存到本地存储');
+      } catch (error) {
+        console.log('無法保存書籤到本地存储:', error.message);
+      }
+    }
+
+    // 綜合書籤獲取策略
+    async function fetchBookmarks() {
+      // 策略1：嘗試從本地存储獲取（用戶自定義的書籤）
+      if (getBookmarksFromStorage()) {
+        return;
+      }
+      
+      // 策略2：嘗試從本地服務器獲取（本地開發環境）
+      if (await fetchBookmarksFromServer()) {
+        return;
+      }
+      
+      // 策略3：嘗試從 JSON 文件獲取（GitHub Pages）
+      if (await fetchBookmarksFromFile()) {
+        return;
+      }
+      
+      // 策略4：使用默認書籤
+      console.log('使用默認書籤');
+      renderBookmarks(bookmarksData);
     }
 
     // 生成橫向書籤連結
@@ -210,12 +405,67 @@
         bar.appendChild(link);
       });
     }
+
+    // 編輯模態框功能
+    function openEditModal() {
+      document.getElementById('editModal').style.display = 'block';
+      renderEditList();
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').style.display = 'none';
+    }
+
+    function renderEditList() {
+      const list = document.getElementById('bookmarksList');
+      list.innerHTML = '';
+      bookmarksData.forEach((bookmark, index) => {
+        const item = document.createElement('div');
+        item.className = 'bookmark-item';
+        item.innerHTML = `
+          <input type="text" placeholder="書籤名稱" value="${bookmark.name}" onchange="updateBookmark(${index}, 'name', this.value)">
+          <input type="text" placeholder="網址" value="${bookmark.url}" onchange="updateBookmark(${index}, 'url', this.value)">
+          <button onclick="removeBookmark(${index})">刪除</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function updateBookmark(index, field, value) {
+      bookmarksData[index][field] = value;
+    }
+
+    function removeBookmark(index) {
+      bookmarksData.splice(index, 1);
+      renderEditList();
+    }
+
+    function addBookmark() {
+      bookmarksData.push({ name: '新書籤', url: 'https://example.com' });
+      renderEditList();
+    }
+
+    function saveBookmarks() {
+      // 過濾掉空的書籤
+      bookmarksData = bookmarksData.filter(b => b.name.trim() && b.url.trim());
+      saveBookmarksToStorage(bookmarksData);
+      renderBookmarks(bookmarksData);
+      closeEditModal();
+    }
+
+    // 點擊模態框外部關閉
+    window.onclick = function(event) {
+      const modal = document.getElementById('editModal');
+      if (event.target === modal) {
+        closeEditModal();
+      }
+    }
     
     // 頁面加載時執行
     document.addEventListener('DOMContentLoaded', function() {
       // 先渲染默認書籤
       renderBookmarks(bookmarksData);
-      // 嘗試獲取 Chrome 書籤
+      // 嘗試獲取書籤
       fetchBookmarks();
     });
     

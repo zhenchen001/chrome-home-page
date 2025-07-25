@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Google",
+    "url": "https://www.google.com/webhp?hl=en&sa=X&ved=0ahUKEwiap6ObiZn6AhXhmlYBHXyxAT0QPAgI"
+  },
+  {
+    "name": "YouTube",
+    "url": "https://www.youtube.com/?gl=TW&tab=w1"
+  },
+  {
+    "name": "Netflix",
+    "url": "https://www.netflix.com/browse"
+  },
+  {
+    "name": "FB",
+    "url": "https://www.facebook.com/"
+  },
+  {
+    "name": "PChome",
+    "url": "https://24h.pchome.com.tw/"
+  },
+  {
+    "name": "shopee",
+    "url": "https://shopee.tw/?gclid=Cj0KCQjw166aBhDEARIsAMEyZh4AAkU_sY7c-B9p1UXPwv7DLNSoVuDyuinOZGjo06DT7gvMJaBTwEkaAoeXEALw_wcB"
+  },
+  {
+    "name": "NYCU Portal",
+    "url": "https://portal.nycu.edu.tw/#/login?redirect=%2F"
+  },
+  {
+    "name": "GPE Helper",
+    "url": "https://gpe-helper.setsal.dev/exams"
+  },
+  {
+    "name": "W3Schools",
+    "url": "https://www.w3schools.com/"
+  },
+  {
+    "name": "notion",
+    "url": "https://www.notion.so/cb85e826381f40b0aebf338eb9126abf"
+  },
+  {
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com/"
+  },
+  {
+    "name": "GeeksforGeeks",
+    "url": "https://www.geeksforgeeks.org/"
+  },
+  {
+    "name": "交大資工考古題系統",
+    "url": "https://pastexam.nctucsunion.me/main/85"
+  },
+  {
+    "name": "calendar",
+    "url": "https://calendar.google.com/calendar/u/1/r/month/2025/7/1"
+  },
+  {
+    "name": "LeetCode",
+    "url": "https://leetcode.com/"
+  },
+  {
+    "name": "iCloud",
+    "url": "https://www.icloud.com/"
+  },
+  {
+    "name": "GitHub",
+    "url": "https://github.com/"
+  },
+  {
+    "name": "Copilot",
+    "url": "https://github.com/copilot"
+  },
+  {
+    "name": "Basics of Computer Networking ",
+    "url": "https://www.geeksforgeeks.org/basics-computer-networking/?ref=next_article_top"
+  },
+  {
+    "name": "missing semester",
+    "url": "https://missing-semester-zh-hant.github.io/2020/course-shell/"
+  },
+  {
+    "name": "信號與系統",
+    "url": "https://www.youtube.com/playlist?list=PLxMgz3qtpNvVL6lo9ESoeG5f-airyWtqt"
+  }
+]
