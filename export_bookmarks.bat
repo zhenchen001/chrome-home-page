@@ -2,17 +2,17 @@
 chcp 65001 >nul
 echo.
 echo ══════════════════════════════════════
-echo    Chrome 书签导出工具
+echo    Chrome 書籤導出工具
 echo ══════════════════════════════════════
 echo.
-echo 此工具将导出您的 Chrome 书签为 JSON 文件
-echo 用于 GitHub Pages 部署
+echo 此工具將導出您的 Chrome 書籤為 JSON 文件
+echo 用於 GitHub Pages 部署
 echo.
-echo ⚠️  请确保 Chrome 浏览器已完全关闭！
+echo ⚠️  請確保 Chrome 瀏覽器已完全關閉！
 echo.
 pause
 echo.
-echo 正在运行导出工具...
+echo 正在運行導出工具...
 echo.
 python export_bookmarks.py
 echo.

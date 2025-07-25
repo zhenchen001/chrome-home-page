@@ -19,9 +19,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
+      margin-top: 150px;
     }
     .container {
-      margin-top: 300px;
+      margin-top: 200px;
       background: #fff;
       padding: 40px 30px;
       border-radius: 18px;
@@ -81,16 +82,19 @@
     /* 書籤橫向排版在白色框外 */
     .bookmarks-bar {
       position: absolute;
-      top: 230px;
+      top: 20px;
       left: 0;
       width: 100vw;
       display: flex;
       flex-direction: row;
+      flex-wrap: wrap;
       justify-content: center;
       align-items: center;
       gap: 16px;
       z-index: 1;
       pointer-events: auto;
+      padding: 0 90px 0 20px;
+      box-sizing: border-box;
     }
     .bookmark-link {
       color: #fff;
@@ -105,12 +109,17 @@
       cursor: pointer;
       white-space: nowrap;
       opacity: 0.85;
+      position: relative;
     }
     .bookmark-link:hover {
       background: #222;
       color: #fff;
       opacity: 1;
       text-decoration: underline;
+    }
+    .bookmark-link.dragging {
+      opacity: 0.5;
+      transform: rotate(5deg);
     }
     /* 編輯按鈕 */
     .edit-btn {
@@ -123,15 +132,53 @@
       border-radius: 50%;
       width: 50px;
       height: 50px;
-      font-size: 1.5rem;
+      font-size: 2rem;
+      font-weight: 300;
       cursor: pointer;
       transition: background 0.2s;
       z-index: 1000;
       opacity: 0.7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
     }
     .edit-btn:hover {
       background: #555;
       opacity: 1;
+    }
+    /* 資料夾按鈕 */
+    .folder-btn {
+      position: fixed;
+      top: 20px;
+      right: 80px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 1000;
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .folder-btn:hover {
+      background: #555;
+      opacity: 1;
+    }
+    .folder-btn.drop-zone {
+      background: #4CAF50;
+      transform: scale(1.1);
+    }
+    .folder-icon {
+      width: 32px;
+      height: 32px;
+      display: block;
     }
     /* 編輯模態框 */
     .modal {
@@ -142,93 +189,230 @@
       top: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0,0,0,0.8);
+      background-color: rgba(0,0,0,0.95);
     }
     .modal-content {
-      background-color: #fff;
-      margin: 10% auto;
-      padding: 30px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 600px;
-      max-height: 70vh;
+      background-color: #000;
+      margin: 5% auto;
+      padding: 40px;
+      border-radius: 18px;
+      width: 85%;
+      max-width: 650px;
+      max-height: 80vh;
       overflow-y: auto;
+      border: 1px solid #333;
     }
     .modal h2 {
       margin-top: 0;
-      color: #333;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      text-align: center;
+      margin-bottom: 30px;
     }
     .bookmark-item {
       display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
+      gap: 15px;
+      margin-bottom: 20px;
       align-items: center;
+      padding: 15px;
+      background: #111;
+      border-radius: 12px;
+      border: 1px solid #333;
+      flex-wrap: wrap;
     }
     .bookmark-item input {
       flex: 1;
-      padding: 8px 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 0.95rem;
+      min-width: 200px;
+      padding: 12px 16px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #222;
+      color: #fff;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .bookmark-item input:focus {
+      border: 1px solid #666;
+    }
+    .bookmark-item input::placeholder {
+      color: #999;
     }
     .bookmark-item button {
-      background: #dc3545;
-      color: white;
+      background: #333;
+      color: #fff;
       border: none;
-      border-radius: 6px;
-      padding: 8px 12px;
+      border-radius: 8px;
+      padding: 12px 18px;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+      flex-shrink: 0;
+      min-width: 80px;
     }
     .bookmark-item button:hover {
-      background: #c82333;
+      background: #555;
     }
     .modal-buttons {
       display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 20px;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
     }
     .modal-buttons button {
-      padding: 10px 20px;
+      padding: 12px 24px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 1rem;
       cursor: pointer;
       transition: background 0.2s;
+      font-weight: 500;
     }
     .btn-primary {
-      background: #007bff;
-      color: white;
+      background: #fff;
+      color: #000;
     }
     .btn-primary:hover {
-      background: #0056b3;
+      background: #f0f0f0;
     }
     .btn-secondary {
-      background: #6c757d;
-      color: white;
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
     }
     .btn-secondary:hover {
-      background: #545b62;
+      background: #555;
     }
     .btn-success {
-      background: #28a745;
-      color: white;
-      margin-bottom: 15px;
+      background: #fff;
+      color: #000;
+      margin-bottom: 25px;
+      width: 100%;
+      padding: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      border-radius: 12px;
     }
     .btn-success:hover {
-      background: #1e7e34;
+      background: #f0f0f0;
+    }
+    /* 隱藏書籤模態框 */
+    .hidden-modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.95);
+    }
+    .hidden-modal-content {
+      background-color: #000;
+      margin: 5% auto;
+      padding: 40px;
+      border-radius: 18px;
+      width: 85%;
+      max-width: 650px;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid #333;
+    }
+    .hidden-modal h2 {
+      margin-top: 0;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .hidden-bookmark-item {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      align-items: center;
+      padding: 15px;
+      background: #111;
+      border-radius: 12px;
+      border: 1px solid #333;
+      flex-wrap: wrap;
+    }
+    .hidden-bookmark-link {
+      flex: 1;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1rem;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: background 0.2s;
+      min-width: 200px;
+    }
+    .hidden-bookmark-link:hover {
+      background: #333;
+      text-decoration: underline;
+    }
+    .restore-btn {
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .restore-btn:hover {
+      background: #f0f0f0;
     }
     @media (max-width: 700px) {
       .bookmarks-bar {
         flex-wrap: wrap;
         gap: 8px;
         font-size: 0.95rem;
-        top: 180px;
+        top: 15px;
+        padding: 0 70px 0 10px;
       }
       .container {
-        margin-top: 200px;
+        margin-top: 150px;
         padding: 24px 8px;
+      }
+      .edit-btn {
+        top: 15px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.8rem;
+      }
+      .folder-btn {
+        top: 15px;
+        right: 75px;
+        width: 45px;
+        height: 45px;
+      }
+      .folder-icon {
+        width: 30px;
+        height: 30px;
+      }
+      .modal-content {
+        width: 95%;
+        margin: 2% auto;
+        padding: 20px;
+      }
+      .bookmark-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .bookmark-item input {
+        min-width: unset;
+        width: 100%;
+      }
+      .bookmark-item button {
+        width: 100%;
+        min-width: unset;
       }
     }
     @media (max-width: 480px) {
@@ -236,7 +420,8 @@
         flex-wrap: wrap;
         gap: 6px;
         font-size: 0.90rem;
-        top: 120px;
+        top: 10px;
+        padding: 0 60px 0 5px;
       }
       .container {
         margin-top: 120px;
@@ -249,12 +434,62 @@
         width: 18px;
         height: 18px;
       }
+      .edit-btn {
+        top: 10px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        font-size: 1.6rem;
+      }
+      .folder-btn {
+        top: 10px;
+        right: 65px;
+        width: 40px;
+        height: 40px;
+      }
+      .folder-icon {
+        width: 28px;
+        height: 28px;
+      }
+      .hidden-modal-content {
+        width: 98%;
+        margin: 1% auto;
+        padding: 15px;
+      }
+      .hidden-modal h2 {
+        font-size: 1.5rem;
+      }
+      .hidden-bookmark-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .hidden-bookmark-link {
+        min-width: unset;
+        width: 100%;
+      }
+      .restore-btn {
+        width: 100%;
+      }
+      .modal-content {
+        width: 98%;
+        margin: 1% auto;
+        padding: 15px;
+      }
+      .modal h2 {
+        font-size: 1.5rem;
+      }
     }
   </style>
 </head>
 <body>
-  <button class="edit-btn" onclick="openEditModal()" title="編輯書籤">⚙️</button>
-  
+  <button class="folder-btn" onclick="openHiddenModal()" title="隱藏的書籤" ondrop="dropBookmark(event)" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)">
+    <svg class="folder-icon" viewBox="0 0 24 24" fill="none">
+      <path d="M10 4H4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V8C22 6.89543 21.1046 6 20 6H12L10 4Z" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <button class="edit-btn" onclick="openEditModal()" title="編輯書籤">+</button>
+
   <div class="bookmarks-bar" id="bookmarksBar">
     <!-- 書籤連結將在這裡生成 -->
   </div>
@@ -275,14 +510,27 @@
   <!-- 編輯書籤模態框 -->
   <div id="editModal" class="modal">
     <div class="modal-content">
-      <h2>編輯書籤</h2>
-      <button class="btn-success" onclick="addBookmark()">➕ 添加新書籤</button>
+      <h2>Edit Bookmarks</h2>
+      <button class="btn-success" onclick="addBookmark()">+ Add Bookmark</button>
       <div id="bookmarksList">
         <!-- 書籤編輯項目將在這裡生成 -->
       </div>
       <div class="modal-buttons">
-        <button class="btn-secondary" onclick="closeEditModal()">取消</button>
-        <button class="btn-primary" onclick="saveBookmarks()">保存</button>
+        <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveBookmarks()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 隱藏書籤模態框 -->
+  <div id="hiddenModal" class="hidden-modal">
+    <div class="hidden-modal-content">
+      <h2>Hidden Bookmarks</h2>
+      <div id="hiddenBookmarksList">
+        <!-- 隱藏的書籤將在這裡顯示 -->
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-secondary" onclick="closeHiddenModal()">Close</button>
       </div>
     </div>
   </div>
@@ -302,6 +550,9 @@
       { "name": "YouTube", "url": "https://youtube.com/" },
       { "name": "維基百科", "url": "https://zh.wikipedia.org/" }
     ];
+
+    // 隱藏的書籤資料
+    let hiddenBookmarks = [];
 
     // 從 JSON 文件獲取書籤（用於 GitHub Pages）
     async function fetchBookmarksFromFile() {
@@ -354,6 +605,12 @@
             return true;
           }
         }
+        
+        // 獲取隱藏的書籤
+        const hiddenStored = localStorage.getItem('hiddenBookmarks');
+        if (hiddenStored) {
+          hiddenBookmarks = JSON.parse(hiddenStored);
+        }
       } catch (error) {
         console.log('無法從本地存储獲取書籤:', error.message);
       }
@@ -364,6 +621,7 @@
     function saveBookmarksToStorage(bookmarks) {
       try {
         localStorage.setItem('customBookmarks', JSON.stringify(bookmarks));
+        localStorage.setItem('hiddenBookmarks', JSON.stringify(hiddenBookmarks));
         console.log('書籤已保存到本地存储');
       } catch (error) {
         console.log('無法保存書籤到本地存储:', error.message);
@@ -396,12 +654,26 @@
     function renderBookmarks(bookmarks) {
       const bar = document.getElementById('bookmarksBar');
       bar.innerHTML = '';
-      bookmarks.forEach(b => {
+      bookmarks.forEach((b, index) => {
         const link = document.createElement('a');
         link.className = 'bookmark-link';
         link.textContent = b.name;
         link.href = b.url;
         link.target = '_blank';
+        link.draggable = true;
+        link.dataset.index = index;
+        
+        // 添加拖拽事件
+        link.addEventListener('dragstart', function(e) {
+          e.dataTransfer.setData('text/plain', index);
+          e.dataTransfer.effectAllowed = 'move';
+          link.classList.add('dragging');
+        });
+        
+        link.addEventListener('dragend', function(e) {
+          link.classList.remove('dragging');
+        });
+        
         bar.appendChild(link);
       });
     }
@@ -425,7 +697,7 @@
         item.innerHTML = `
           <input type="text" placeholder="書籤名稱" value="${bookmark.name}" onchange="updateBookmark(${index}, 'name', this.value)">
           <input type="text" placeholder="網址" value="${bookmark.url}" onchange="updateBookmark(${index}, 'url', this.value)">
-          <button onclick="removeBookmark(${index})">刪除</button>
+          <button onclick="removeBookmark(${index})">Delete</button>
         `;
         list.appendChild(item);
       });
@@ -453,11 +725,86 @@
       closeEditModal();
     }
 
+    // 拖拽功能
+    function allowDrop(event) {
+      event.preventDefault();
+      event.currentTarget.classList.add('drop-zone');
+    }
+
+    function leaveDrop(event) {
+      event.currentTarget.classList.remove('drop-zone');
+    }
+
+    function dropBookmark(event) {
+      event.preventDefault();
+      event.currentTarget.classList.remove('drop-zone');
+      
+      const bookmarkIndex = parseInt(event.dataTransfer.getData('text/plain'));
+      if (!isNaN(bookmarkIndex) && bookmarkIndex >= 0 && bookmarkIndex < bookmarksData.length) {
+        // 將書籤移到隱藏列表
+        const bookmark = bookmarksData.splice(bookmarkIndex, 1)[0];
+        hiddenBookmarks.push(bookmark);
+        
+        // 更新顯示和儲存
+        renderBookmarks(bookmarksData);
+        saveBookmarksToStorage(bookmarksData);
+        
+        console.log('書籤已隱藏:', bookmark.name);
+      }
+    }
+
+    // 隱藏書籤模態框功能
+    function openHiddenModal() {
+      document.getElementById('hiddenModal').style.display = 'block';
+      renderHiddenBookmarks();
+    }
+
+    function closeHiddenModal() {
+      document.getElementById('hiddenModal').style.display = 'none';
+    }
+
+    function renderHiddenBookmarks() {
+      const list = document.getElementById('hiddenBookmarksList');
+      list.innerHTML = '';
+      
+      if (hiddenBookmarks.length === 0) {
+        list.innerHTML = '<p style="color: #999; text-align: center; margin: 40px 0;">沒有隱藏的書籤</p>';
+        return;
+      }
+      
+      hiddenBookmarks.forEach((bookmark, index) => {
+        const item = document.createElement('div');
+        item.className = 'hidden-bookmark-item';
+        item.innerHTML = `
+          <a href="${bookmark.url}" target="_blank" class="hidden-bookmark-link">${bookmark.name}</a>
+          <button class="restore-btn" onclick="restoreBookmark(${index})">Restore</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function restoreBookmark(index) {
+      // 將書籤從隱藏列表移回主列表
+      const bookmark = hiddenBookmarks.splice(index, 1)[0];
+      bookmarksData.push(bookmark);
+      
+      // 更新顯示和儲存
+      renderBookmarks(bookmarksData);
+      renderHiddenBookmarks();
+      saveBookmarksToStorage(bookmarksData);
+      
+      console.log('書籤已恢復:', bookmark.name);
+    }
+
     // 點擊模態框外部關閉
     window.onclick = function(event) {
       const modal = document.getElementById('editModal');
+      const hiddenModal = document.getElementById('hiddenModal');
       if (event.target === modal) {
         closeEditModal();
+      }
+      if (event.target === hiddenModal) {
+        closeHiddenModal();
       }
     }
     
