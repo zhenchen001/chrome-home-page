@@ -676,7 +676,7 @@
         link.className = 'bookmark-link';
         link.textContent = b.name;
         link.href = b.url;
-        link.target = '_blank';
+        // 移除 target="_blank" 讓連結在同一分頁開啟
         link.draggable = true;
         link.dataset.index = index;
         
@@ -793,7 +793,7 @@
         const item = document.createElement('div');
         item.className = 'hidden-bookmark-item';
         item.innerHTML = `
-          <a href="${bookmark.url}" target="_blank" class="hidden-bookmark-link">${bookmark.name}</a>
+          <a href="${bookmark.url}" class="hidden-bookmark-link">${bookmark.name}</a>
           <button class="restore-btn" onclick="restoreBookmark(${index})">Restore</button>
         `;
         list.appendChild(item);
