@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>簡約瀏覽器首頁</title>
+  <title>home page</title>
   <style>
     body {
       margin: 0;
@@ -88,7 +88,6 @@
       e.preventDefault();
       const query = document.getElementById('searchInput').value.trim();
       if (query) {
-        // 跳轉到 Google 搜尋結果，也可改為其他搜尋引擎
         window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
       }
     });
