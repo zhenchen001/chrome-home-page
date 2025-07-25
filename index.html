@@ -16,11 +16,12 @@
       font-family: 'Segoe UI', 'Noto Sans TC', Helvetica, Arial, sans-serif;
       height: 100vh;
       display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding-top: 300px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
     }
     .container {
+      margin-top: 300px;
       background: #fff;
       padding: 40px 30px;
       border-radius: 18px;
@@ -77,9 +78,62 @@
       height: 20px;
       display: block;
     }
-    @media (max-width: 480px) {
+    /* 書籤橫向排版在白色框外 */
+    .bookmarks-bar {
+      position: absolute;
+      top: 230px;
+      left: 0;
+      width: 100vw;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      z-index: 1;
+      pointer-events: auto;
+    }
+    .bookmark-link {
+      color: #fff;
+      background: none;
+      border: none;
+      font-size: 1rem;
+      font-weight: 500;
+      text-decoration: none;
+      padding: 0 10px;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+      white-space: nowrap;
+      opacity: 0.85;
+    }
+    .bookmark-link:hover {
+      background: #222;
+      color: #fff;
+      opacity: 1;
+      text-decoration: underline;
+    }
+    @media (max-width: 700px) {
+      .bookmarks-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 0.95rem;
+        top: 180px;
+      }
       .container {
+        margin-top: 200px;
         padding: 24px 8px;
+      }
+    }
+    @media (max-width: 480px) {
+      .bookmarks-bar {
+        flex-wrap: wrap;
+        gap: 6px;
+        font-size: 0.90rem;
+        top: 120px;
+      }
+      .container {
+        margin-top: 120px;
+        padding: 20px 2px;
       }
       h1 {
         font-size: 1.4rem;
@@ -92,12 +146,14 @@
   </style>
 </head>
 <body>
+  <div class="bookmarks-bar" id="bookmarksBar">
+    <!-- 書籤連結將在這裡生成 -->
+  </div>
   <div class="container">
     <h1>Google</h1>
     <form id="searchForm" autocomplete="off">
       <input type="text" id="searchInput" placeholder="..." autofocus>
       <button type="submit" aria-label="搜尋">
-        <!-- 放大鏡 SVG 圖案 -->
         <svg class="magnifier" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="7" stroke="white" stroke-width="2" fill="none"/>
           <line x1="16.5" y1="16.5" x2="22" y2="22" stroke="white" stroke-width="2" />
@@ -113,6 +169,63 @@
         window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
       }
     });
+
+    // 書籤資料，將從服務器獲取
+    let bookmarksData = [
+      { "name": "GitHub", "url": "https://github.com/" },
+      { "name": "Google 翻譯", "url": "https://translate.google.com/" },
+      { "name": "YouTube", "url": "https://youtube.com/" },
+      { "name": "維基百科", "url": "https://zh.wikipedia.org/" }
+    ];
+
+    // 從服務器獲取書籤
+    async function fetchBookmarks() {
+      try {
+        const response = await fetch('http://localhost:8000/bookmarks');
+        if (response.ok) {
+          const bookmarks = await response.json();
+          if (bookmarks && bookmarks.length > 0) {
+            bookmarksData = bookmarks;
+            renderBookmarks(bookmarksData);
+            console.log('成功從 Chrome 獲取書籤:', bookmarks.length, '個書籤');
+          }
+        } else {
+          console.log('無法連接到書籤服務器，使用默認書籤');
+        }
+      } catch (error) {
+        console.log('無法獲取書籤數據，使用默認書籤:', error.message);
+      }
+    }
+
+    // 生成橫向書籤連結
+    function renderBookmarks(bookmarks) {
+      const bar = document.getElementById('bookmarksBar');
+      bar.innerHTML = '';
+      bookmarks.forEach(b => {
+        const link = document.createElement('a');
+        link.className = 'bookmark-link';
+        link.textContent = b.name;
+        link.href = b.url;
+        link.target = '_blank';
+        bar.appendChild(link);
+      });
+    }
+    
+    // 頁面加載時執行
+    document.addEventListener('DOMContentLoaded', function() {
+      // 先渲染默認書籤
+      renderBookmarks(bookmarksData);
+      // 嘗試獲取 Chrome 書籤
+      fetchBookmarks();
+    });
+    
+    // 如果頁面已經加載完成，立即執行
+    if (document.readyState === 'loading') {
+      // 等待 DOMContentLoaded
+    } else {
+      renderBookmarks(bookmarksData);
+      fetchBookmarks();
+    }
   </script>
 </body>
 </html>
