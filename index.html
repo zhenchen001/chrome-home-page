@@ -595,6 +595,13 @@
     // 從本地存储獲取書籤
     function getBookmarksFromStorage() {
       try {
+        // 先載入隱藏書籤
+        const hiddenStored = localStorage.getItem('hiddenBookmarks');
+        if (hiddenStored) {
+          hiddenBookmarks = JSON.parse(hiddenStored);
+          console.log('載入隱藏書籤:', hiddenBookmarks.length, '個');
+        }
+        
         const stored = localStorage.getItem('customBookmarks');
         if (stored) {
           const bookmarks = JSON.parse(stored);
@@ -604,12 +611,6 @@
             console.log('從本地存储獲取書籤:', bookmarks.length, '個書籤');
             return true;
           }
-        }
-        
-        // 獲取隱藏的書籤
-        const hiddenStored = localStorage.getItem('hiddenBookmarks');
-        if (hiddenStored) {
-          hiddenBookmarks = JSON.parse(hiddenStored);
         }
       } catch (error) {
         console.log('無法從本地存储獲取書籤:', error.message);
@@ -630,6 +631,9 @@
 
     // 綜合書籤獲取策略
     async function fetchBookmarks() {
+      // 先載入隱藏書籤（無論使用哪種數據源）
+      loadHiddenBookmarks();
+      
       // 策略1：嘗試從本地存储獲取（用戶自定義的書籤）
       if (getBookmarksFromStorage()) {
         return;
@@ -648,6 +652,19 @@
       // 策略4：使用默認書籤
       console.log('使用默認書籤');
       renderBookmarks(bookmarksData);
+    }
+
+    // 載入隱藏書籤
+    function loadHiddenBookmarks() {
+      try {
+        const hiddenStored = localStorage.getItem('hiddenBookmarks');
+        if (hiddenStored) {
+          hiddenBookmarks = JSON.parse(hiddenStored);
+          console.log('載入隱藏書籤:', hiddenBookmarks.length, '個');
+        }
+      } catch (error) {
+        console.log('無法載入隱藏書籤:', error.message);
+      }
     }
 
     // 生成橫向書籤連結
@@ -810,7 +827,9 @@
     
     // 頁面加載時執行
     document.addEventListener('DOMContentLoaded', function() {
-      // 先渲染默認書籤
+      // 先載入隱藏書籤
+      loadHiddenBookmarks();
+      // 渲染默認書籤
       renderBookmarks(bookmarksData);
       // 嘗試獲取書籤
       fetchBookmarks();
@@ -820,6 +839,7 @@
     if (document.readyState === 'loading') {
       // 等待 DOMContentLoaded
     } else {
+      loadHiddenBookmarks();
       renderBookmarks(bookmarksData);
       fetchBookmarks();
     }
