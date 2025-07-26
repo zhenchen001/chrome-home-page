@@ -45,6 +45,7 @@
       flex-direction: row;
       align-items: center;
       gap: 10px;
+      position: relative;
     }
     input[type="text"] {
       flex: 1;
@@ -57,6 +58,36 @@
     }
     input[type="text"]:focus {
       border: 1.5px solid #888;
+    }
+    .suggestions {
+      position: absolute;
+      top: calc(100% + 3px);
+      left: 0;
+      right: 67px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-top: none;
+      border-radius:   8px 8px;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    .suggestion-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s;
+      font-size: 1rem;
+      color: #333;
+    }
+    .suggestion-item:hover {
+      background: #f8f8f8;
+    }
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+    .suggestion-item.selected {
+      background: #f8f8f8;
     }
     button {
       padding: 10px 18px;
@@ -103,9 +134,9 @@
       font-size: 1rem;
       font-weight: 500;
       text-decoration: none;
-      padding: 0 10px;
+      padding: 8px 12px;
       border-radius: 6px;
-      transition: background 0.2s, color 0.2s;
+      transition: all 0.3s ease;
       cursor: pointer;
       white-space: nowrap;
       opacity: 0.85;
@@ -115,7 +146,9 @@
       background: #222;
       color: #fff;
       opacity: 1;
-      text-decoration: underline;
+      text-decoration: none;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
     }
     .bookmark-link.dragging {
       opacity: 0.5;
@@ -498,6 +531,7 @@
     <h1>Google</h1>
     <form id="searchForm" autocomplete="off">
       <input type="text" id="searchInput" placeholder="..." autofocus>
+      <div class="suggestions" id="suggestions"></div>
       <button type="submit" aria-label="搜尋">
         <svg class="magnifier" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="7" stroke="white" stroke-width="2" fill="none"/>
@@ -535,12 +569,132 @@
     </div>
   </div>
   <script>
+    // Google 搜尋建議功能
+    let suggestionsTimeout;
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsDiv = document.getElementById('suggestions');
+
+    // 獲取 Google 搜尋建議
+    function getSuggestions(query) {
+      if (!query.trim()) {
+        hideSuggestions();
+        return;
+      }
+
+      const script = document.createElement('script');
+      const callbackName = 'suggestions_' + Date.now();
+      
+      window[callbackName] = function(data) {
+        try {
+          const suggestions = data[1] || [];
+          showSuggestions(suggestions, query);
+          document.head.removeChild(script);
+          delete window[callbackName];
+        } catch (error) {
+          console.log('獲取建議時出錯:', error);
+          hideSuggestions();
+        }
+      };
+      
+      script.src = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}&callback=${callbackName}`;
+      script.onerror = function() {
+        hideSuggestions();
+        document.head.removeChild(script);
+        delete window[callbackName];
+      };
+      document.head.appendChild(script);
+    }
+
+    // 顯示建議
+    function showSuggestions(suggestions, originalQuery) {
+      suggestionsDiv.innerHTML = '';
+      
+      if (suggestions.length === 0) {
+        hideSuggestions();
+        return;
+      }
+
+      suggestions.slice(0, 6).forEach(suggestion => {
+        const item = document.createElement('div');
+        item.className = 'suggestion-item';
+        item.textContent = suggestion;
+        item.onclick = function() {
+          searchInput.value = suggestion;
+          hideSuggestions();
+          performSearch(suggestion);
+        };
+        suggestionsDiv.appendChild(item);
+      });
+
+      suggestionsDiv.style.display = 'block';
+    }
+
+    // 隱藏建議
+    function hideSuggestions() {
+      suggestionsDiv.style.display = 'none';
+    }
+
+    // 執行搜尋
+    function performSearch(query) {
+      if (query.trim()) {
+        window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+      }
+    }
+
+    // 搜尋輸入事件
+    searchInput.addEventListener('input', function() {
+      clearTimeout(suggestionsTimeout);
+      const query = this.value.trim();
+      
+      if (query.length > 0) {
+        suggestionsTimeout = setTimeout(() => {
+          getSuggestions(query);
+        }, 300); // 延遲 300ms 以避免過於頻繁的請求
+      } else {
+        hideSuggestions();
+      }
+    });
+
+    // 鍵盤導航支援
+    searchInput.addEventListener('keydown', function(e) {
+      const items = suggestionsDiv.querySelectorAll('.suggestion-item');
+      const current = suggestionsDiv.querySelector('.suggestion-item.selected');
+      let index = current ? Array.from(items).indexOf(current) : -1;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (current) current.classList.remove('selected');
+        index = (index + 1) % items.length;
+        if (items[index]) {
+          items[index].classList.add('selected');
+          searchInput.value = items[index].textContent;
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (current) current.classList.remove('selected');
+        index = index <= 0 ? items.length - 1 : index - 1;
+        if (items[index]) {
+          items[index].classList.add('selected');
+          searchInput.value = items[index].textContent;
+        }
+      } else if (e.key === 'Escape') {
+        hideSuggestions();
+        searchInput.blur();
+      }
+    });
+
+    // 點擊外部隱藏建議
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('form')) {
+        hideSuggestions();
+      }
+    });
+
     document.getElementById('searchForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const query = document.getElementById('searchInput').value.trim();
-      if (query) {
-        window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
-      }
+      hideSuggestions();
+      performSearch(query);
     });
 
     // 書籤資料，將從 JSON 文件或本地存储獲取
